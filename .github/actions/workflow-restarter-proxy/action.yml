@@ -43,7 +43,7 @@ runs:
         require 'octokit'
         client = Octokit::Client.new(:access_token => ENV['SOURCE_REPO_GITHUB_TOKEN'])
         client.post(
-          '/repos/${{ inputs.repository }}/actions/workflows/reusable-workflow-restart-failed-job.yml/dispatches',
+          '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
           {
             ref: 'main',
             inputs: {
