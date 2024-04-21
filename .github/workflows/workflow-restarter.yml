@@ -1,6 +1,20 @@
 ---
 name: Workflow Restarter
 on:
+  workflow_call:
+    inputs:
+      repo:
+        required: true
+        type: string
+      run_id:
+        required: true
+        type: string
+      # token:
+      #   required: true
+      #   type: string
+    secrets:
+      SOURCE_REPO_GITHUB_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       repo:
@@ -11,10 +25,13 @@ on:
         description: "The ID of the workflow run to rerun."
         required: true
         type: string
+      # token:
+      #   description: "The ID of the workflow run to rerun."
+      #   required: true
+      #   type: string
     secrets:
-      GITHUB_TOKEN:
+      SOURCE_REPO_GITHUB_TOKEN:
         required: true
-
 jobs:
   rerun:
     runs-on: ubuntu-latest
@@ -35,7 +52,7 @@ jobs:
       run: |
         bundle exec ruby -e "
         require 'octokit'
-        client = Octokit::Client.new(:access_token => '${{ secrets.GITHUB_TOKEN }}')
+        client = Octokit::Client.new(:access_token => '${{ secrets.SOURCE_REPO_GITHUB_TOKEN }}')
         repo = '${{ inputs.repo }}'
         run_id = '${{ inputs.run_id }}'
         response = client.workflow_run(repo, run_id)

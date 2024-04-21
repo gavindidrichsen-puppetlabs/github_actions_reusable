@@ -28,36 +28,33 @@ runs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # setup ruby including a bundle install of my Gemfile
-    - name: Set up Ruby and install Octokit
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3'
-        bundler-cache: true # 'bundle install' will be run and gems cached for faster workflow runs
+    # # setup ruby including a bundle install of my Gemfile
+    # - name: Set up Ruby and install Octokit
+    #   uses: ruby/setup-ruby@v1
+    #   with:
+    #     ruby-version: '3'
+    #     bundler-cache: true # 'bundle install' will be run and gems cached for faster workflow runs
 
-    #  '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
-    - name: Trigger reusable workflow
-      shell: bash
-      run: |
-        bundle exec ruby -e "
-        require 'octokit'
-        client = Octokit::Client.new(:access_token => '${{ env.SOURCE_REPO_GITHUB_TOKEN }}')
-        client.post(
-          '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
-          {
-            ref: 'development',
-            inputs: {
-              repo: '${{ github.repository }}',
-              run_id: '${{ github.run_id }}',
-              source_repo_github_token: '${{ env.SOURCE_REPO_GITHUB_TOKEN }}'
-            }
-          }
-        )
-        "
-
-    # THIS DOESN'T WORK...
-    # - name: Trigger Reusable Workflow
-    #   uses: ./.github/workflows/workflow-restarter.yml
+    # - name: Trigger reusable workflow
+    #   shell: bash
+    #   run: |
+    #     bundle exec ruby -e "
+    #     require 'octokit'
+    #     client = Octokit::Client.new(:access_token => '${{ env.GITHUB_TOKEN }}')
+    #     client.post(
+    #       '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
+    #       {
+    #         ref: 'development',
+    #         inputs: {
+    #           repo: '${{ github.repository }}',
+    #           run_id: '${{ github.run_id }}',
+    #           token: '${{ env.SOURCE_REPO_GITHUB_TOKEN }}'
+    #         }
+    #       }
+    #     )
+    #     "
+    - name: Trigger Reusable Workflow
+      uses: ./.github/workflows/workflow-restarter.yml
       # uses: gavindidrichsen-puppetlabs/github-actions-reusable/.github/workflows/workflow-restarter.yml@development
     
     # - name: Trigger reusable workflow
