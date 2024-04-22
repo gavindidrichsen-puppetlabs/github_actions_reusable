@@ -16,12 +16,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # ABORT if not GITHUB_TOKEN environment variable set
-    - name: Check for presence of SOURCE_REPO_GITHUB_TOKEN environment variable
+    # ABORT if not SOURCE_GITHUB_TOKEN environment variable set
+    - name: Check for presence of SOURCE_GITHUB_TOKEN environment variable
       shell: bash
       run: |
-        if [[ -z "${{ env.SOURCE_REPO_GITHUB_TOKEN }}" ]]; then
-          echo "ERROR: \$SOURCE_REPO_GITHUB_TOKEN must be set by the calling workflow" 1>&2 && exit 1
+        if [[ -z "${{ env.SOURCE_GITHUB_TOKEN }}" ]]; then
+          echo "ERROR: \$SOURCE_GITHUB_TOKEN must be set by the calling workflow" 1>&2 && exit 1
         fi
 
     # checkout the repository because I want bundler to have access to my Gemfile
@@ -35,41 +35,21 @@ runs:
         ruby-version: '3'
         bundler-cache: true # 'bundle install' will be run and gems cached for faster workflow runs
 
-    #  '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
+    # Trigger the reusable workflow
     - name: Trigger reusable workflow
       shell: bash
       run: |
         bundle exec ruby -e "
         require 'octokit'
-        client = Octokit::Client.new(:access_token => '${{ env.SOURCE_REPO_GITHUB_TOKEN }}')
+        client = Octokit::Client.new(:access_token => '${{ env.SOURCE_GITHUB_TOKEN }}')
         client.post(
-          '/repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
+          '/repos/${{ inputs.repository }}/actions/workflows/workflow-restarter.yml/dispatches',
           {
-            ref: 'development',
+            ref: 'main',
             inputs: {
-              repo: '${{ github.repository }}',
-              run_id: '${{ github.run_id }}',
-              source_repo_github_token: '${{ env.SOURCE_REPO_GITHUB_TOKEN }}'
+              repo: '${{ inputs.repository }}',
+              run_id: '${{ inputs.run_id }}'
             }
           }
         )
         "
-
-    # THIS DOESN'T WORK...
-    # - name: Trigger Reusable Workflow
-    #   uses: ./.github/workflows/workflow-restarter.yml
-      # uses: gavindidrichsen-puppetlabs/github-actions-reusable/.github/workflows/workflow-restarter.yml@development
-    
-    # - name: Trigger reusable workflow
-    #   shell: bash
-    #   env:
-    #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #     SOURCE_REPO_GITHUB_TOKEN: ${{ env.SOURCE_REPO_GITHUB_TOKEN }}
-    #   run: |
-    #     gh api repos/${{ github.repository }}/actions/workflows/workflow-restarter.yml/dispatches \
-    #       --raw-field ref=development \
-    #       --raw-field inputs.repo='${{ inputs.repository }}' \
-    #       --raw-field inputs.run_id='${{ inputs.run_id }}' \
-    #       --raw-field inputs.token='${{ env.SOURCE_REPO_GITHUB_TOKEN }}' \
-    #       --header authorization:"Bearer ${{ env.GITHUB_TOKEN }}"
-
