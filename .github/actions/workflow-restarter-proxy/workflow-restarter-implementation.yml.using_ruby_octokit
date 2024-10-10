@@ -1,7 +1,7 @@
 ---
-name: Workflow Restarter
+name: Workflow Restarter Implementation
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       repo:
         description: "GitHub repository name."
@@ -14,11 +14,8 @@ on:
       retries:
         description: "The number of times to retry the workflow run."
         required: false
-        type: number
-        default: 3
-    secrets:
-      GITHUB_TOKEN:
-        required: true
+        type: string
+        default: "3"
 
 jobs:
   rerun:
