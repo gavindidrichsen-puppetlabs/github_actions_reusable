@@ -5,9 +5,9 @@ on:
     inputs:
       fail:
         description: >
-          For (acceptance, unit) jobs: 
-          'true'  = (fail, succeed) and 
-          'false' = (succeed, fail)  
+          For (acceptance, unit) jobs:
+          'true'  = (fail, succeed) and
+          'false' = (succeed, fail)
         required: true
         default: 'true'
 env:
@@ -17,28 +17,28 @@ jobs:
   unit:
     runs-on: ubuntu-latest
     steps:
-    - name: Check outcome
-      run: |
-        if [ "${{ github.event.inputs.fail }}" = "true" ]; then
-          echo "'unit' job succeeded"
-          exit 0
-        else
-          echo "'unit' job failed"
-          exit 1
-        fi
+      - name: Check outcome
+        run: |
+            if [ "${{ github.event.inputs.fail }}" = "true" ]; then
+            echo "'unit' job succeeded"
+            exit 0
+            else
+            echo "'unit' job failed"
+            exit 1
+            fi
   acceptance:
     runs-on: ubuntu-latest
     steps:
-    - name: Check outcome
-      run: |
-        if [ "${{ github.event.inputs.fail }}" = "true" ]; then
-          echo "'acceptance' job failed"
-          exit 1
-        else
-          echo "'acceptance' job succeeded"
-          exit 0
-        fi
-  
+      - name: Check outcome
+        run: |
+            if [ "${{ github.event.inputs.fail }}" = "true" ]; then
+            echo "'acceptance' job failed"
+            exit 1
+            else
+            echo "'acceptance' job succeeded"
+            exit 0
+            fi
+
   on-failure-workflow-restarter-proxy:
     # (1) run this job after the "acceptance" job and...
     needs: [acceptance, unit]
@@ -55,7 +55,8 @@ jobs:
       # this to trigger the reusable workflow that restarts the failed job; and
       # (b) custom actions do not have access to the calling workflow's secrets
       - name: Trigger reusable workflow
-        uses: "puppetlabs/cat-github-actions/.github/actions/workflow-restarter-proxy@main"
+        # uses: "puppetlabs/cat-github-actions/.github/actions/workflow-restarter-proxy@main"
+        uses: "gavindidrichsen-puppetlabs/github_actions_reusable/.github/actions/workflow-restarter-proxy@main"
         env:
           SOURCE_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
